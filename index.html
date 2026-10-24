@@ -494,19 +494,19 @@
           <!-- Token Section -->
           <div class="form-group">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-              <label for="githubToken" style="margin-bottom: 0;">GitHub Token (Tự Động Kết Nối):</label>
-              <span id="tokenStatusText" style="font-size: 0.75rem; color: #10b981; font-weight: 600;">✅ Đã kết nối vĩnh viễn</span>
+              <label for="githubToken" style="margin-bottom: 0;">GitHub Personal Access Token (PAT):</label>
+              <span id="tokenStatusText" style="font-size: 0.75rem; color: #10b981; font-weight: 600; display: none;">✅ Đã lưu trên trình duyệt</span>
             </div>
             <div class="input-wrapper">
-              <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
+              <input type="password" id="githubToken" placeholder="Dán mã ghp_xxxxxxxxxxxxxxxxxxxx vào đây" autocomplete="off">
               <button type="button" class="toggle-token-btn" id="toggleTokenBtn">Hiện</button>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
-              <span class="token-guide-toggle" id="toggleGuideBtn">Cách lấy token mới?</span>
-              <small style="color: #64748b; font-size: 0.72rem;">Đã tích hợp sẵn vĩnh viễn cho tài khoản trannhatlong120499</small>
+              <span class="token-guide-toggle" id="toggleGuideBtn">Cách lấy token trong 30 giây?</span>
+              <small style="color: #64748b; font-size: 0.72rem;">Token chỉ lưu an toàn trên trình duyệt của riêng bạn</small>
             </div>
             <div class="token-guide" id="tokenGuide">
-              Hệ thống đã tự động tích hợp sẵn token của bạn. Nếu sau này bạn muốn đổi token khác, bạn có thể dán vào ô trên và hệ thống sẽ tự động lưu đè.
+              Vào <a href="https://github.com/settings/tokens/new" target="_blank">github.com/settings/tokens/new</a>, tick chọn quyền <b>repo</b> (hoặc <b>contents:write</b>), kéo xuống bấm <b>Generate token</b> và dán vào ô trên. Token chỉ lưu an toàn trong bộ nhớ máy của bạn.
             </div>
           </div>
 
@@ -643,22 +643,10 @@
       log('Đã làm sạch nhật ký.', 'info');
     });
 
-    function getEmbeddedToken() {
-      const enc = "==wR3kmaYFTMxBDMyckUJtWVup3TthjRkF0aWJ1M5gmaCJWUB10Xwh2Z";
-      try {
-        return atob(enc.split('').reverse().join(''));
-      } catch (e) {
-        return '';
-      }
-    }
-
-    const embeddedToken = getEmbeddedToken();
-    const savedToken = localStorage.getItem('lslop_gh_token');
-    const effectiveToken = savedToken || embeddedToken;
-
-    if (effectiveToken) {
-      githubTokenInput.value = effectiveToken;
-      tokenStatusText.innerText = savedToken ? '✅ Đã lưu token tuỳ chỉnh' : '✅ Đã kết nối vĩnh viễn (trannhatlong120499)';
+    const savedToken = localStorage.getItem('lslop_gh_token') || '';
+    if (savedToken) {
+      githubTokenInput.value = savedToken;
+      tokenStatusText.innerText = '✅ Đã lưu trên trình duyệt';
       tokenStatusText.style.display = 'inline';
     }
 
@@ -666,17 +654,12 @@
       const val = githubTokenInput.value.trim();
       if (val) {
         localStorage.setItem('lslop_gh_token', val);
-        tokenStatusText.innerText = '✅ Đã lưu token tuỳ chỉnh';
+        tokenStatusText.innerText = '✅ Đã lưu trên trình duyệt';
         tokenStatusText.style.display = 'inline';
+        loadRepoFiles();
       } else {
         localStorage.removeItem('lslop_gh_token');
-        if (embeddedToken) {
-          githubTokenInput.value = embeddedToken;
-          tokenStatusText.innerText = '✅ Đã khôi phục token vĩnh viễn';
-          tokenStatusText.style.display = 'inline';
-        } else {
-          tokenStatusText.style.display = 'none';
-        }
+        tokenStatusText.style.display = 'none';
       }
     });
 
@@ -728,7 +711,7 @@
     // Load Repo Files List
     async function loadRepoFiles() {
       try {
-        const token = githubTokenInput.value.trim() || getEmbeddedToken();
+        const token = githubTokenInput.value.trim();
         const headers = token ? { 'Authorization': `token ${token}` } : {};
         const res = await fetch(`${API_BASE}/contents`, { headers });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -855,7 +838,7 @@
 
     // Main Submit Action
     submitBtn.addEventListener('click', async () => {
-      const token = githubTokenInput.value.trim() || getEmbeddedToken();
+      const token = githubTokenInput.value.trim();
       if (!token) {
         alert('Vui lòng nhập GitHub Personal Access Token trước khi cập nhật!');
         githubTokenInput.focus();
