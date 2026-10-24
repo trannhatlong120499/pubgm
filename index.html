@@ -542,8 +542,8 @@
           <div class="form-group">
             <label for="targetPakNameInput">Tên Tệp PAK Trên GitHub:</label>
             <input type="text" id="targetPakNameInput" placeholder="game_patch_4.6.1.21583.pak">
-            <small style="color: var(--text-muted); font-size: 0.72rem; display: block; margin-top: 4px;">
-              Tên file này sẽ được lưu vào version.json để App Lslop tự động tải về đúng tên.
+            <small style="color: #38bdf8; font-size: 0.72rem; display: block; margin-top: 4px;">
+              ⚡ Bất kể tệp bạn chọn tải lên tên là gì, hệ thống sẽ tự động đổi thành đúng tên này trên GitHub và cập nhật vào version.json.
             </small>
           </div>
 
@@ -577,7 +577,10 @@
           </div>
           <div class="card-body" style="padding: 16px;">
             <div id="repoFilesList">
-              <div style="color: var(--text-muted); font-size: 0.8rem; text-align: center; padding: 10px;">Đang tải danh sách...</div>
+              <div style="color: #64748b; font-size: 0.82rem; text-align: center; padding: 22px 10px;">
+                <div style="font-size: 26px; margin-bottom: 8px;">🔒</div>
+                <div>Vui lòng nhập GitHub Token ở trên để xem danh sách tệp</div>
+              </div>
             </div>
           </div>
         </div>
@@ -660,6 +663,7 @@
       } else {
         localStorage.removeItem('lslop_gh_token');
         tokenStatusText.style.display = 'none';
+        loadRepoFiles();
       }
     });
 
@@ -710,16 +714,29 @@
 
     // Load Repo Files List
     async function loadRepoFiles() {
+      const token = githubTokenInput.value.trim();
+      if (!token) {
+        repoFilesList.innerHTML = `
+          <div style="color: #64748b; font-size: 0.82rem; text-align: center; padding: 22px 10px;">
+            <div style="font-size: 26px; margin-bottom: 8px;">🔒</div>
+            <div>Vui lòng nhập GitHub Token ở trên để xem danh sách tệp</div>
+          </div>
+        `;
+        return;
+      }
+
       try {
-        const token = githubTokenInput.value.trim();
-        const headers = token ? { 'Authorization': `token ${token}` } : {};
+        repoFilesList.innerHTML = `<div style="color: var(--text-muted); font-size: 0.8rem; text-align: center; padding: 14px;">Đang tải danh sách...</div>`;
+        const headers = { 'Authorization': `token ${token}` };
         const res = await fetch(`${API_BASE}/contents`, { headers });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const files = await res.json();
 
         repoFilesList.innerHTML = '';
+        let fileCount = 0;
         files.forEach(f => {
           if (f.type === 'file') {
+            fileCount++;
             const row = document.createElement('div');
             row.className = 'file-item';
             const sizeKB = (f.size / 1024).toFixed(1);
@@ -735,8 +752,11 @@
             repoFilesList.appendChild(row);
           }
         });
+        if (fileCount === 0) {
+          repoFilesList.innerHTML = `<div style="color: #64748b; font-size: 0.8rem; text-align: center; padding: 10px;">Chưa có tệp nào trên kho lưu trữ.</div>`;
+        }
       } catch (err) {
-        repoFilesList.innerHTML = `<div style="color: #f87171; font-size: 0.8rem; text-align: center;">Không tải được danh sách tệp: ${err.message}</div>`;
+        repoFilesList.innerHTML = `<div style="color: #f87171; font-size: 0.8rem; text-align: center; padding: 10px;">Không tải được danh sách tệp: ${err.message}</div>`;
       }
     }
 
@@ -781,11 +801,21 @@
       selectedFileSize.innerText = `(${sizeMB} MB)`;
       fileInfoBadge.style.display = 'inline-flex';
 
-      // Auto update targetPakName input
-      targetPakNameInput.value = file.name;
+      // Giữ nguyên tên đích nếu người dùng hoặc version.json đã có tên
+      if (!targetPakNameInput.value.trim()) {
+        targetPakNameInput.value = file.name;
+      }
 
-      log(`📁 Đã chọn file: ${file.name} (${sizeMB} MB)`, 'info');
+      const dest = targetPakNameInput.value.trim();
+      log(`📁 Đã chọn file nguồn: "${file.name}" (${sizeMB} MB) ➔ Sẽ tự động đổi tên thành: "${dest}" khi tải lên GitHub`, 'info');
     }
+
+    targetPakNameInput.addEventListener('input', () => {
+      if (currentSelectedFile) {
+        const dest = targetPakNameInput.value.trim();
+        log(`✏️ Tên tệp lưu trên GitHub sẽ là: "${dest}" (File gốc: "${currentSelectedFile.name}")`, 'info');
+      }
+    });
 
     // Convert file to Base64
     function fileToBase64(file) {
