@@ -522,6 +522,7 @@
                 <span>📁</span>
                 <b id="selectedFileName">filename.pak</b>
                 <span id="selectedFileSize">(0 MB)</span>
+                <span id="removeSelectedFileBtn" style="cursor: pointer; margin-left: 8px; color: #fb7185; font-size: 1.1rem; line-height: 1; padding: 2px 4px;" title="Huỷ chọn tệp">✕</span>
               </div>
             </div>
           </div>
@@ -547,10 +548,13 @@
             </small>
           </div>
 
-          <!-- Submit Button -->
-          <button class="btn-submit" id="submitBtn">
+          <!-- Submit Button (Chỉ hiển thị khi đã chọn tệp) -->
+          <button class="btn-submit" id="submitBtn" style="display: none;">
             <span>🚀 CẬP NHẬT LÊN GITHUB</span>
           </button>
+          <div id="noFileNotice" style="text-align: center; color: #64748b; font-size: 0.8rem; padding: 14px; background: rgba(255, 255, 255, 0.02); border: 1px dashed rgba(255, 255, 255, 0.08); border-radius: 12px; margin-top: 4px;">
+            ⚠️ Hãy kéo thả hoặc chọn tệp .pak ở trên để mở nút cập nhật lên GitHub
+          </div>
         </div>
       </div>
 
@@ -616,6 +620,8 @@
     const clearLogBtn = document.getElementById('clearLogBtn');
     const refreshRepoBtn = document.getElementById('refreshRepoBtn');
     const repoFilesList = document.getElementById('repoFilesList');
+    const noFileNotice = document.getElementById('noFileNotice');
+    const removeSelectedFileBtn = document.getElementById('removeSelectedFileBtn');
 
     let currentSelectedFile = null;
 
@@ -794,12 +800,36 @@
       }
     });
 
+    function clearSelectedFile() {
+      currentSelectedFile = null;
+      pakFileInput.value = '';
+      fileInfoBadge.style.display = 'none';
+      submitBtn.style.display = 'none';
+      if (noFileNotice) noFileNotice.style.display = 'block';
+      log('🗑️ Đã huỷ chọn tệp.', 'info');
+    }
+
+    if (removeSelectedFileBtn) {
+      removeSelectedFileBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        clearSelectedFile();
+      });
+    }
+
     function handleFileSelected(file) {
+      if (!file) {
+        clearSelectedFile();
+        return;
+      }
       currentSelectedFile = file;
       selectedFileName.innerText = file.name;
       const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
       selectedFileSize.innerText = `(${sizeMB} MB)`;
       fileInfoBadge.style.display = 'inline-flex';
+
+      // Hiện nút Cập nhật lên GitHub và ẩn thông báo
+      submitBtn.style.display = 'flex';
+      if (noFileNotice) noFileNotice.style.display = 'none';
 
       // Giữ nguyên tên đích nếu người dùng hoặc version.json đã có tên
       if (!targetPakNameInput.value.trim()) {
@@ -868,6 +898,11 @@
 
     // Main Submit Action
     submitBtn.addEventListener('click', async () => {
+      if (!currentSelectedFile) {
+        alert('Vui lòng chọn tệp mod .pak trước khi cập nhật lên GitHub!');
+        return;
+      }
+
       const token = githubTokenInput.value.trim();
       if (!token) {
         alert('Vui lòng nhập GitHub Personal Access Token trước khi cập nhật!');
@@ -934,6 +969,9 @@
 
         log(`✨ TẤT CẢ HOÀN TẤT! Người dùng Lslop mở app sẽ nhận ngay bản mod này.`, 'success');
         alert(`Chúc mừng! Đã cập nhật thành công bản ${version} (${updateDate}) lên GitHub!`);
+
+        // Dọn dẹp tệp đã tải và ẩn nút cập nhật lại
+        clearSelectedFile();
 
         // Refresh live stats
         await loadVersionInfo();
