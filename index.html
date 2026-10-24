@@ -519,20 +519,6 @@
       display: none;
     }
 
-    .auth-footer-hint {
-      margin-top: 20px;
-      font-size: 0.74rem;
-      color: #64748b;
-    }
-
-    .auth-footer-hint code {
-      color: #38bdf8;
-      background: rgba(56, 189, 248, 0.12);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-family: 'JetBrains Mono', monospace;
-    }
-
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
       20%, 60% { transform: translateX(-9px); }
@@ -624,9 +610,6 @@
           <span>🔓 MỞ KHÓA HỆ THỐNG</span>
         </button>
       </form>
-      <div class="auth-footer-hint">
-        <span>Gợi ý mật mã mặc định: <code>120499</code></span>
-      </div>
     </div>
   </div>
 
@@ -722,7 +705,7 @@
               <input type="text" id="modVersionInput" placeholder="Ví dụ: v3.1.0">
             </div>
             <div class="form-group">
-              <label for="updateDateInput">Ngày Cập Nhật (Tuỳ chọn):</label>
+              <label for="updateDateInput">Ngày Cập Nhật (Chuẩn hôm nay):</label>
               <input type="text" id="updateDateInput" placeholder="Ví dụ: 25/10/2026">
             </div>
           </div>
@@ -804,6 +787,18 @@
     const repoFilesList = document.getElementById('repoFilesList');
 
     let currentSelectedFile = null;
+
+    // Standard Date Helper (DD/MM/YYYY from browser)
+    function getStandardCurrentDate() {
+      const now = new Date();
+      const dd = String(now.getDate()).padStart(2, '0');
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const yyyy = now.getFullYear();
+      return `${dd}/${mm}/${yyyy}`;
+    }
+
+    // Default updateDateInput to current standard date from browser
+    updateDateInput.value = getStandardCurrentDate();
 
     // Logger
     function log(msg, type = 'info') {
@@ -892,11 +887,11 @@
         if (!modVersionInput.value && data.version) {
           modVersionInput.value = data.version;
         }
-        if (!updateDateInput.value && data.update_date) {
-          updateDateInput.value = data.update_date;
+        if (!updateDateInput.value) {
+          updateDateInput.value = getStandardCurrentDate();
         }
 
-        log(`✅ version.json: Phiên bản ${data.version} - Ngày: ${data.update_date || 'N/A'} - File: ${data.pak_file}`, 'success');
+        log(`✅ version.json: Phiên bản ${data.version} - Ngày file: ${data.update_date || 'N/A'} - File: ${data.pak_file}`, 'success');
       } catch (err) {
         statVersion.innerText = 'Chưa có file';
         statPakFile.innerText = 'Chưa có file';
@@ -1055,15 +1050,8 @@
         return;
       }
 
-      let updateDate = updateDateInput.value.trim();
-      if (!updateDate) {
-        const d = new Date();
-        const dd = String(d.getDate()).padStart(2, '0');
-        const mm = String(d.getMonth() + 1).padStart(2, '0');
-        const yyyy = d.getFullYear();
-        updateDate = `${dd}/${mm}/${yyyy}`;
-        updateDateInput.value = updateDate;
-      }
+      let updateDate = updateDateInput.value.trim() || getStandardCurrentDate();
+      updateDateInput.value = updateDate;
 
       submitBtn.disabled = true;
       submitBtn.innerHTML = `<span>⏳ Đang tải lên GitHub...</span>`;
