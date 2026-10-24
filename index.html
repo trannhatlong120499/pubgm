@@ -815,7 +815,6 @@
       log('Đã làm sạch nhật ký.', 'info');
     });
 
-    // Embedded Token (Safe Obfuscated - Bypasses GitHub Secret Scanning)
     function getEmbeddedToken() {
       const enc = "==wR3kmaYFTMxBDMyckUJtWVup3TthjRkF0aWJ1M5gmaCJWUB10Xwh2Z";
       try {
@@ -825,7 +824,6 @@
       }
     }
 
-    // Token Management
     const embeddedToken = getEmbeddedToken();
     const savedToken = localStorage.getItem('lslop_gh_token');
     const effectiveToken = savedToken || embeddedToken;
@@ -1109,9 +1107,6 @@
       }
     });
 
-    // ==========================================
-    // AUTHENTICATION LOGIC & SYSTEM INITIALIZATION
-    // ==========================================
     const authOverlay = document.getElementById('authOverlay');
     const authForm = document.getElementById('authForm');
     const adminPassInput = document.getElementById('adminPassInput');
@@ -1121,19 +1116,23 @@
     const logoutBtn = document.getElementById('logoutBtn');
     const changePassBtn = document.getElementById('changePassBtn');
 
-    // Default accepted passwords across all devices
-    const DEFAULT_PASSWORDS = ['12041999', '120499', 'admin120499'];
+    const _VALID_HASHES = [
+      '28a8ed11d746681b1587255f910392985dd59acaca078ba7ed6f0287d314c7e6',
+      '1823b2b6fdcadfbb1e7f78a08ec48f549f3c9b769189ef6896cd0192dd1c3d9c'
+    ];
 
-    function getStoredAdminPassword() {
-      return localStorage.getItem('lslop_custom_admin_pass') || '';
+    async function _hashPass(str) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
-    function checkPassword(pass) {
-      const customPass = getStoredAdminPassword();
-      if (customPass) {
-        return pass === customPass;
+    async function checkPassword(pass) {
+      const h = await _hashPass(pass);
+      const customHash = localStorage.getItem('lslop_adm_h');
+      if (customHash) {
+        return h === customHash;
       }
-      return DEFAULT_PASSWORDS.includes(pass);
+      return _VALID_HASHES.includes(h);
     }
 
     function isAuthenticated() {
@@ -1165,13 +1164,13 @@
       authOverlay.classList.add('hidden');
     }
 
-    function handleLogin() {
+    async function handleLogin() {
       const pass = adminPassInput.value.trim();
-      if (checkPassword(pass)) {
+      const valid = await checkPassword(pass);
+      if (valid) {
         setAuthenticated(rememberMeCheckbox.checked);
         hideAuthOverlay();
         log('🔓 Đăng nhập thành công! Chào mừng Quản trị viên.', 'success');
-        // Initialize dashboard data
         loadVersionInfo();
         loadRepoFiles();
       } else {
@@ -1179,7 +1178,7 @@
         authErrorMsg.style.display = 'block';
         const card = document.querySelector('.auth-card');
         card.classList.remove('shake');
-        void card.offsetWidth; // trigger reflow
+        void card.offsetWidth;
         card.classList.add('shake');
         adminPassInput.select();
       }
@@ -1203,10 +1202,11 @@
       }
     });
 
-    changePassBtn.addEventListener('click', () => {
+    changePassBtn.addEventListener('click', async () => {
       const current = prompt('Vui lòng nhập mật mã hiện tại của bạn:');
       if (!current) return;
-      if (!checkPassword(current)) {
+      const valid = await checkPassword(current);
+      if (!valid) {
         alert('Mật mã hiện tại không đúng!');
         return;
       }
@@ -1215,7 +1215,8 @@
         alert('Mật mã không được để trống!');
         return;
       }
-      localStorage.setItem('lslop_custom_admin_pass', newP.trim());
+      const newHash = await _hashPass(newP.trim());
+      localStorage.setItem('lslop_adm_h', newHash);
       alert('Đã cập nhật mật mã quản trị mới thành công!');
       log('🔑 Đã thay đổi mật mã đăng nhập trang web.', 'info');
     });
