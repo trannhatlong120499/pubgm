@@ -444,176 +444,11 @@
       color: #38bdf8;
     }
 
-    /* Auth Modal & Screen */
-    .auth-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(6, 8, 14, 0.94);
-      backdrop-filter: blur(28px);
-      -webkit-backdrop-filter: blur(28px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      padding: 20px;
-      transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s;
-    }
-
-    .auth-overlay.hidden {
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-    }
-
-    .auth-card {
-      max-width: 440px;
-      width: 100%;
-      padding: 38px 30px;
-      text-align: center;
-      position: relative;
-      background: rgba(15, 23, 42, 0.92);
-      border: 1px solid rgba(0, 210, 255, 0.35);
-      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85), 0 0 35px rgba(0, 210, 255, 0.18);
-      border-radius: 24px;
-    }
-
-    .auth-icon-wrap {
-      width: 68px;
-      height: 68px;
-      border-radius: 20px;
-      background: linear-gradient(135deg, rgba(0, 210, 255, 0.25), rgba(121, 40, 202, 0.35));
-      border: 1px solid rgba(0, 210, 255, 0.45);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 32px;
-      margin: 0 auto 20px;
-      box-shadow: 0 0 25px rgba(0, 210, 255, 0.35);
-    }
-
-    .auth-title {
-      font-size: 1.45rem;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      margin-bottom: 8px;
-      background: linear-gradient(to right, #ffffff, #67e8f9);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .auth-desc {
-      font-size: 0.84rem;
-      color: var(--text-muted);
-      margin-bottom: 24px;
-      line-height: 1.5;
-    }
-
-    .auth-error-msg {
-      margin-top: 8px;
-      font-size: 0.78rem;
-      color: #fb7185;
-      font-weight: 600;
-      display: none;
-    }
-
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      20%, 60% { transform: translateX(-9px); }
-      40%, 80% { transform: translateX(9px); }
-    }
-
-    .shake {
-      animation: shake 0.38s ease-in-out;
-    }
-
-    /* Logout Button & Admin Info in Header */
-    .admin-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid rgba(16, 185, 129, 0.25);
-      padding: 6px 12px;
-      border-radius: 100px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: #34d399;
-    }
-
-    .logout-btn {
-      background: rgba(244, 63, 94, 0.12);
-      border: 1px solid rgba(244, 63, 94, 0.25);
-      color: #fb7185;
-      padding: 6px 14px;
-      border-radius: 100px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.2s;
-    }
-
-    .logout-btn:hover {
-      background: rgba(244, 63, 94, 0.25);
-      border-color: rgba(244, 63, 94, 0.45);
-      color: #fff;
-    }
-
-    .change-pass-btn {
-      color: #94a3b8;
-      font-size: 0.72rem;
-      text-decoration: underline;
-      cursor: pointer;
-      background: none;
-      border: none;
-      padding: 0;
-    }
-    .change-pass-btn:hover {
-      color: #38bdf8;
-    }
   </style>
 </head>
 <body>
 
-  <!-- Auth Overlay (Screen Lock) -->
-  <div id="authOverlay" class="auth-overlay">
-    <div class="auth-card glass-card">
-      <div class="auth-icon-wrap">
-        <div class="auth-icon">🛡️</div>
-      </div>
-      <h2 class="auth-title">Lslop Admin Portal</h2>
-      <p class="auth-desc">Khu vực quản trị PUBG Mobile Mod. Vui lòng xác thực mật mã quản trị viên để mở khóa.</p>
-      
-      <form id="authForm" onsubmit="event.preventDefault(); handleLogin();">
-        <div class="form-group" style="text-align: left; margin-bottom: 16px;">
-          <label for="adminPassInput" style="font-size: 0.82rem; color: #cbd5e1;">Mật mã Quản Trị:</label>
-          <div class="input-wrapper">
-            <input type="password" id="adminPassInput" placeholder="Nhập mật mã quản trị..." autofocus autocomplete="current-password">
-            <button type="button" class="toggle-token-btn" id="toggleAuthPassBtn">Hiện</button>
-          </div>
-          <div id="authErrorMsg" class="auth-error-msg">Mật mã không đúng, vui lòng thử lại!</div>
-        </div>
-
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-size: 0.78rem;">
-          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #94a3b8; margin-bottom: 0;">
-            <input type="checkbox" id="rememberMeCheckbox" checked style="width: auto; cursor: pointer; accent-color: #00d2ff;">
-            Ghi nhớ đăng nhập trên thiết bị này
-          </label>
-        </div>
-
-        <button type="submit" class="btn-submit" id="loginBtn" style="margin-top: 0;">
-          <span>🔓 MỞ KHÓA HỆ THỐNG</span>
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <div class="container" id="mainContainer">
+  <div class="container">
     <!-- Header -->
     <header class="glass-card">
       <div class="brand">
@@ -623,18 +458,11 @@
           <p>Hệ Thống Phân Phối Bản Vá PUBG Mobile</p>
         </div>
       </div>
-      <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-        <div class="admin-badge">
-          <span class="status-dot"></span>
-          <span>Admin: trannhatlong120499</span>
-        </div>
+      <div>
         <a href="https://github.com/trannhatlong120499/pubgm" target="_blank" class="repo-badge">
-          <span>📦</span>
-          <span>pubgm Repo</span>
+          <span class="status-dot"></span>
+          <span>trannhatlong120499/pubgm</span>
         </a>
-        <button id="logoutBtn" class="logout-btn" title="Đăng xuất khỏi bảng điều khiển">
-          <span>🚪 Đăng xuất</span>
-        </button>
       </div>
     </header>
 
@@ -675,7 +503,7 @@
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
               <span class="token-guide-toggle" id="toggleGuideBtn">Cách lấy token mới?</span>
-              <button type="button" class="change-pass-btn" id="changePassBtn">🔑 Đổi mật mã đăng nhập web</button>
+              <small style="color: #64748b; font-size: 0.72rem;">Đã tích hợp sẵn vĩnh viễn cho tài khoản trannhatlong120499</small>
             </div>
             <div class="token-guide" id="tokenGuide">
               Hệ thống đã tự động tích hợp sẵn token của bạn. Nếu sau này bạn muốn đổi token khác, bạn có thể dán vào ô trên và hệ thống sẽ tự động lưu đè.
@@ -1107,128 +935,9 @@
       }
     });
 
-    const authOverlay = document.getElementById('authOverlay');
-    const authForm = document.getElementById('authForm');
-    const adminPassInput = document.getElementById('adminPassInput');
-    const toggleAuthPassBtn = document.getElementById('toggleAuthPassBtn');
-    const authErrorMsg = document.getElementById('authErrorMsg');
-    const rememberMeCheckbox = document.getElementById('rememberMeCheckbox');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const changePassBtn = document.getElementById('changePassBtn');
-
-    const _VALID_HASHES = [
-      '28a8ed11d746681b1587255f910392985dd59acaca078ba7ed6f0287d314c7e6',
-      '1823b2b6fdcadfbb1e7f78a08ec48f549f3c9b769189ef6896cd0192dd1c3d9c'
-    ];
-
-    async function _hashPass(str) {
-      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
-    }
-
-    async function checkPassword(pass) {
-      const h = await _hashPass(pass);
-      const customHash = localStorage.getItem('lslop_adm_h');
-      if (customHash) {
-        return h === customHash;
-      }
-      return _VALID_HASHES.includes(h);
-    }
-
-    function isAuthenticated() {
-      return localStorage.getItem('lslop_admin_authenticated') === 'true' ||
-             sessionStorage.getItem('lslop_admin_authenticated') === 'true';
-    }
-
-    function setAuthenticated(remember) {
-      if (remember) {
-        localStorage.setItem('lslop_admin_authenticated', 'true');
-      } else {
-        sessionStorage.setItem('lslop_admin_authenticated', 'true');
-      }
-    }
-
-    function clearAuthentication() {
-      localStorage.removeItem('lslop_admin_authenticated');
-      sessionStorage.removeItem('lslop_admin_authenticated');
-    }
-
-    function showAuthOverlay() {
-      authOverlay.classList.remove('hidden');
-      adminPassInput.value = '';
-      authErrorMsg.style.display = 'none';
-      setTimeout(() => adminPassInput.focus(), 150);
-    }
-
-    function hideAuthOverlay() {
-      authOverlay.classList.add('hidden');
-    }
-
-    async function handleLogin() {
-      const pass = adminPassInput.value.trim();
-      const valid = await checkPassword(pass);
-      if (valid) {
-        setAuthenticated(rememberMeCheckbox.checked);
-        hideAuthOverlay();
-        log('🔓 Đăng nhập thành công! Chào mừng Quản trị viên.', 'success');
-        loadVersionInfo();
-        loadRepoFiles();
-      } else {
-        authErrorMsg.innerText = '❌ Mật mã không chính xác, vui lòng thử lại!';
-        authErrorMsg.style.display = 'block';
-        const card = document.querySelector('.auth-card');
-        card.classList.remove('shake');
-        void card.offsetWidth;
-        card.classList.add('shake');
-        adminPassInput.select();
-      }
-    }
-
-    toggleAuthPassBtn.addEventListener('click', () => {
-      if (adminPassInput.type === 'password') {
-        adminPassInput.type = 'text';
-        toggleAuthPassBtn.innerText = 'Ẩn';
-      } else {
-        adminPassInput.type = 'password';
-        toggleAuthPassBtn.innerText = 'Hiện';
-      }
-    });
-
-    logoutBtn.addEventListener('click', () => {
-      if (confirm('Bạn có chắc chắn muốn đăng xuất khỏi trang quản trị?')) {
-        clearAuthentication();
-        showAuthOverlay();
-        log('🔒 Đã đăng xuất khỏi phiên làm việc.', 'warn');
-      }
-    });
-
-    changePassBtn.addEventListener('click', async () => {
-      const current = prompt('Vui lòng nhập mật mã hiện tại của bạn:');
-      if (!current) return;
-      const valid = await checkPassword(current);
-      if (!valid) {
-        alert('Mật mã hiện tại không đúng!');
-        return;
-      }
-      const newP = prompt('Nhập mật mã mới bạn muốn đặt:');
-      if (!newP || newP.trim().length === 0) {
-        alert('Mật mã không được để trống!');
-        return;
-      }
-      const newHash = await _hashPass(newP.trim());
-      localStorage.setItem('lslop_adm_h', newHash);
-      alert('Đã cập nhật mật mã quản trị mới thành công!');
-      log('🔑 Đã thay đổi mật mã đăng nhập trang web.', 'info');
-    });
-
-    // Check auth on page load
-    if (isAuthenticated()) {
-      hideAuthOverlay();
-      loadVersionInfo();
-      loadRepoFiles();
-    } else {
-      showAuthOverlay();
-    }
+    // Auto-init on page load
+    loadVersionInfo();
+    loadRepoFiles();
   </script>
 </body>
 </html>
