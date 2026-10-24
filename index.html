@@ -178,13 +178,32 @@
     /* Status Banner */
     .version-summary {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 12px;
       margin-bottom: 24px;
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 860px) {
       .version-summary {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 500px) {
+      .version-summary {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .upload-slots-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    @media (max-width: 650px) {
+      .upload-slots-grid {
         grid-template-columns: 1fr;
       }
     }
@@ -419,6 +438,27 @@
       background: rgba(56, 189, 248, 0.2);
     }
 
+    .file-delete-btn {
+      color: #fb7185;
+      text-decoration: none;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(244, 63, 94, 0.12);
+      border: 1px solid rgba(244, 63, 94, 0.25);
+      cursor: pointer;
+      transition: all 0.2s;
+      outline: none;
+    }
+
+    .file-delete-btn:hover {
+      background: rgba(244, 63, 94, 0.28);
+      border-color: rgba(244, 63, 94, 0.5);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
     /* Modal / Tooltip */
     .token-guide-toggle {
       font-size: 0.75rem;
@@ -477,6 +517,10 @@
         <div class="stat-val" id="statPakFile">Đang tải...</div>
       </div>
       <div class="stat-box glass-card">
+        <div class="stat-label">File FLIST Mục Tiêu</div>
+        <div class="stat-val" id="statFlistFile">Đang tải...</div>
+      </div>
+      <div class="stat-box glass-card">
         <div class="stat-label">Ngày Cập Nhật</div>
         <div class="stat-val" id="statUpdateDate">--</div>
       </div>
@@ -510,50 +554,79 @@
             </div>
           </div>
 
-          <!-- File Upload Zone -->
-          <div class="form-group">
-            <label>Chọn Tệp Mod PAK Mới (*.pak):</label>
-            <div class="file-dropzone" id="dropZone">
-              <input type="file" id="pakFileInput" accept=".pak" style="display: none;">
-              <div class="dropzone-icon">📦</div>
-              <div class="dropzone-text">Kéo thả tệp .pak vào đây hoặc bấm để chọn</div>
-              <div class="dropzone-hint">Hỗ trợ tải lên trực tiếp tới 100 MB</div>
-              <div class="file-info-badge" id="fileInfoBadge">
-                <span>📁</span>
-                <b id="selectedFileName">filename.pak</b>
-                <span id="selectedFileSize">(0 MB)</span>
-                <span id="removeSelectedFileBtn" style="cursor: pointer; margin-left: 8px; color: #fb7185; font-size: 1.1rem; line-height: 1; padding: 2px 4px;" title="Huỷ chọn tệp">✕</span>
+          <!-- Dual File Upload Slots: PAK & FLIST -->
+          <div class="upload-slots-grid">
+            <!-- Slot 1: PAK File -->
+            <div class="form-group" style="margin-bottom: 0;">
+              <label>1. Chọn Tệp Mod PAK (*.pak):</label>
+              <div class="file-dropzone" id="pakDropZone">
+                <input type="file" id="pakFileInput" accept=".pak" style="display: none;">
+                <div class="dropzone-icon">📦</div>
+                <div class="dropzone-text">Chọn hoặc thả tệp .pak</div>
+                <div class="dropzone-hint">Chỉ chấp nhận tệp *.pak</div>
+                <div class="file-info-badge" id="pakFileInfoBadge">
+                  <span>📦</span>
+                  <b id="pakSelectedFileName">game_patch.pak</b>
+                  <span id="pakSelectedFileSize">(0 MB)</span>
+                  <span id="removePakBtn" style="cursor: pointer; margin-left: 8px; color: #fb7185; font-size: 1.1rem; line-height: 1; padding: 2px 4px;" title="Huỷ chọn tệp PAK">✕</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Slot 2: FLIST File -->
+            <div class="form-group" style="margin-bottom: 0;">
+              <label>2. Chọn Tệp Reslist (*.flist):</label>
+              <div class="file-dropzone" id="flistDropZone">
+                <input type="file" id="flistFileInput" accept=".flist" style="display: none;">
+                <div class="dropzone-icon">📄</div>
+                <div class="dropzone-text">Chọn hoặc thả tệp .flist</div>
+                <div class="dropzone-hint">Chỉ chấp nhận tệp *.flist</div>
+                <div class="file-info-badge" id="flistFileInfoBadge">
+                  <span>📄</span>
+                  <b id="flistSelectedFileName">apollo_reslist.flist</b>
+                  <span id="flistSelectedFileSize">(0 KB)</span>
+                  <span id="removeFlistBtn" style="cursor: pointer; margin-left: 8px; color: #fb7185; font-size: 1.1rem; line-height: 1; padding: 2px 4px;" title="Huỷ chọn tệp FLIST">✕</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Version Info Input -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
-            <div class="form-group">
-              <label for="modVersionInput">Phiên Bản Mod:</label>
-              <input type="text" id="modVersionInput" placeholder="Ví dụ: v3.1.0">
+          <!-- Target Filenames on GitHub -->
+          <div class="upload-slots-grid">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="targetPakNameInput">Tên Tệp PAK Trên GitHub:</label>
+              <input type="text" id="targetPakNameInput" placeholder="game_patch_4.6.1.21583.pak">
+              <small style="color: #38bdf8; font-size: 0.72rem; display: block; margin-top: 4px;">
+                ⚡ Bắt buộc có đuôi <b>.pak</b> (đổi tên chuẩn tự động)
+              </small>
             </div>
-            <div class="form-group">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="targetFlistNameInput">Tên Tệp FLIST Trên GitHub:</label>
+              <input type="text" id="targetFlistNameInput" placeholder="apollo_reslist.flist">
+              <small style="color: #38bdf8; font-size: 0.72rem; display: block; margin-top: 4px;">
+                ⚡ Bắt buộc có đuôi <b>.flist</b> (mặc định: apollo_reslist.flist)
+              </small>
+            </div>
+          </div>
+
+          <!-- Version Info Input -->
+          <div class="upload-slots-grid">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="modVersionInput">Phiên Bản Mod:</label>
+              <input type="text" id="modVersionInput" placeholder="Ví dụ: v3.0.0">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
               <label for="updateDateInput">Ngày Cập Nhật (Chuẩn hôm nay):</label>
               <input type="text" id="updateDateInput" placeholder="Ví dụ: 25/10/2026">
             </div>
           </div>
 
-          <!-- Target PAK filename -->
-          <div class="form-group">
-            <label for="targetPakNameInput">Tên Tệp PAK Trên GitHub:</label>
-            <input type="text" id="targetPakNameInput" placeholder="game_patch_4.6.1.21583.pak">
-            <small style="color: #38bdf8; font-size: 0.72rem; display: block; margin-top: 4px;">
-              ⚡ Bất kể tệp bạn chọn tải lên tên là gì, hệ thống sẽ tự động đổi thành đúng tên này trên GitHub và cập nhật vào version.json.
-            </small>
-          </div>
-
-          <!-- Submit Button (Chỉ hiển thị khi đã chọn tệp) -->
+          <!-- Submit Button (Chỉ hiển thị khi đã chọn tệp hợp lệ) -->
           <button class="btn-submit" id="submitBtn" style="display: none;">
             <span>🚀 CẬP NHẬT LÊN GITHUB</span>
           </button>
           <div id="noFileNotice" style="text-align: center; color: #64748b; font-size: 0.8rem; padding: 14px; background: rgba(255, 255, 255, 0.02); border: 1px dashed rgba(255, 255, 255, 0.08); border-radius: 12px; margin-top: 4px;">
-            ⚠️ Hãy kéo thả hoặc chọn tệp .pak ở trên để mở nút cập nhật lên GitHub
+            ⚠️ Vui lòng chọn hoặc kéo thả tệp .pak hoặc .flist ở trên để mở nút cập nhật lên GitHub
           </div>
         </div>
       </div>
@@ -598,34 +671,63 @@
     const RAW_BASE = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main`;
     const API_BASE = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}`;
 
-    // DOM Elements
+    // DOM Elements - Status Cards
     const statVersion = document.getElementById('statVersion');
     const statPakFile = document.getElementById('statPakFile');
+    const statFlistFile = document.getElementById('statFlistFile');
     const statUpdateDate = document.getElementById('statUpdateDate');
+
+    // DOM Elements - Token
     const githubTokenInput = document.getElementById('githubToken');
     const toggleTokenBtn = document.getElementById('toggleTokenBtn');
     const tokenStatusText = document.getElementById('tokenStatusText');
     const toggleGuideBtn = document.getElementById('toggleGuideBtn');
     const tokenGuide = document.getElementById('tokenGuide');
-    const dropZone = document.getElementById('dropZone');
+
+    // DOM Elements - PAK Slot
+    const pakDropZone = document.getElementById('pakDropZone');
     const pakFileInput = document.getElementById('pakFileInput');
-    const fileInfoBadge = document.getElementById('fileInfoBadge');
-    const selectedFileName = document.getElementById('selectedFileName');
-    const selectedFileSize = document.getElementById('selectedFileSize');
+    const pakFileInfoBadge = document.getElementById('pakFileInfoBadge');
+    const pakSelectedFileName = document.getElementById('pakSelectedFileName');
+    const pakSelectedFileSize = document.getElementById('pakSelectedFileSize');
+    const removePakBtn = document.getElementById('removePakBtn');
+    const targetPakNameInput = document.getElementById('targetPakNameInput');
+
+    // DOM Elements - FLIST Slot
+    const flistDropZone = document.getElementById('flistDropZone');
+    const flistFileInput = document.getElementById('flistFileInput');
+    const flistFileInfoBadge = document.getElementById('flistFileInfoBadge');
+    const flistSelectedFileName = document.getElementById('flistSelectedFileName');
+    const flistSelectedFileSize = document.getElementById('flistSelectedFileSize');
+    const removeFlistBtn = document.getElementById('removeFlistBtn');
+    const targetFlistNameInput = document.getElementById('targetFlistNameInput');
+
+    // DOM Elements - Meta Inputs & Action
     const modVersionInput = document.getElementById('modVersionInput');
     const updateDateInput = document.getElementById('updateDateInput');
-    const targetPakNameInput = document.getElementById('targetPakNameInput');
     const submitBtn = document.getElementById('submitBtn');
+    const noFileNotice = document.getElementById('noFileNotice');
+
+    // DOM Elements - Console & Repo
     const consoleBox = document.getElementById('consoleBox');
     const clearLogBtn = document.getElementById('clearLogBtn');
     const refreshRepoBtn = document.getElementById('refreshRepoBtn');
     const repoFilesList = document.getElementById('repoFilesList');
-    const noFileNotice = document.getElementById('noFileNotice');
-    const removeSelectedFileBtn = document.getElementById('removeSelectedFileBtn');
 
-    let currentSelectedFile = null;
+    // State Variables
+    let currentSelectedPakFile = null;
+    let currentSelectedFlistFile = null;
 
-    // Standard Date Helper (DD/MM/YYYY from browser)
+    // Helpers for strict file extension validation
+    function isPakFile(fileName) {
+      return fileName && fileName.toLowerCase().endsWith('.pak');
+    }
+
+    function isFlistFile(fileName) {
+      return fileName && fileName.toLowerCase().endsWith('.flist');
+    }
+
+    // Standard Date Helper (DD/MM/YYYY)
     function getStandardCurrentDate() {
       const now = new Date();
       const dd = String(now.getDate()).padStart(2, '0');
@@ -634,7 +736,6 @@
       return `${dd}/${mm}/${yyyy}`;
     }
 
-    // Default updateDateInput to current standard date from browser
     updateDateInput.value = getStandardCurrentDate();
 
     // Logger
@@ -652,6 +753,7 @@
       log('Đã làm sạch nhật ký.', 'info');
     });
 
+    // Token Management
     const savedToken = localStorage.getItem('lslop_gh_token') || '';
     if (savedToken) {
       githubTokenInput.value = savedToken;
@@ -687,6 +789,171 @@
       tokenGuide.style.display = tokenGuide.style.display === 'block' ? 'none' : 'block';
     });
 
+    // Submit button visibility based on whether any valid file is selected
+    function updateSubmitButtonVisibility() {
+      const hasPak = !!currentSelectedPakFile;
+      const hasFlist = !!currentSelectedFlistFile;
+
+      if (hasPak || hasFlist) {
+        submitBtn.style.display = 'flex';
+        if (noFileNotice) noFileNotice.style.display = 'none';
+
+        if (hasPak && hasFlist) {
+          submitBtn.innerHTML = `<span>🚀 CẬP NHẬT PAK & FLIST LÊN GITHUB</span>`;
+        } else if (hasPak) {
+          submitBtn.innerHTML = `<span>🚀 CẬP NHẬT PAK LÊN GITHUB</span>`;
+        } else {
+          submitBtn.innerHTML = `<span>🚀 CẬP NHẬT FLIST LÊN GITHUB</span>`;
+        }
+      } else {
+        submitBtn.style.display = 'none';
+        if (noFileNotice) noFileNotice.style.display = 'block';
+      }
+    }
+
+    // PAK File Handling
+    function handlePakFileSelected(file) {
+      if (!file) {
+        clearSelectedPakFile();
+        return;
+      }
+
+      if (!isPakFile(file.name)) {
+        log(`❌ TỆP BỊ TỪ CHỐI: "${file.name}" không hợp lệ! Chỉ cho phép tệp đuôi .pak.`, 'err');
+        alert(`❌ LỖI ĐỊNH DẠNG TỆP!\n\nTệp "${file.name}" không phải tệp .pak.\nHệ thống chỉ cho phép tải lên và lưu tệp .pak hoặc .flist lên GitHub!`);
+        return;
+      }
+
+      currentSelectedPakFile = file;
+      pakSelectedFileName.innerText = file.name;
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      pakSelectedFileSize.innerText = `(${sizeMB} MB)`;
+      pakFileInfoBadge.style.display = 'inline-flex';
+
+      if (!targetPakNameInput.value.trim()) {
+        targetPakNameInput.value = file.name;
+      }
+      const dest = targetPakNameInput.value.trim();
+      log(`📦 Đã chọn tệp PAK: "${file.name}" (${sizeMB} MB) ➔ Sẽ lưu thành: "${dest}" trên GitHub`, 'info');
+      updateSubmitButtonVisibility();
+    }
+
+    function clearSelectedPakFile() {
+      currentSelectedPakFile = null;
+      pakFileInput.value = '';
+      pakFileInfoBadge.style.display = 'none';
+      updateSubmitButtonVisibility();
+      log('🗑️ Đã huỷ chọn tệp PAK.', 'info');
+    }
+
+    removePakBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      clearSelectedPakFile();
+    });
+
+    pakDropZone.addEventListener('click', () => pakFileInput.click());
+
+    pakFileInput.addEventListener('change', () => {
+      if (pakFileInput.files && pakFileInput.files.length > 0) {
+        handlePakFileSelected(pakFileInput.files[0]);
+      }
+    });
+
+    // FLIST File Handling
+    function handleFlistFileSelected(file) {
+      if (!file) {
+        clearSelectedFlistFile();
+        return;
+      }
+
+      if (!isFlistFile(file.name)) {
+        log(`❌ TỆP BỊ TỪ CHỐI: "${file.name}" không hợp lệ! Chỉ cho phép tệp đuôi .flist.`, 'err');
+        alert(`❌ LỖI ĐỊNH DẠNG TỆP!\n\nTệp "${file.name}" không phải tệp .flist.\nHệ thống chỉ cho phép tải lên và lưu tệp .pak hoặc .flist lên GitHub!`);
+        return;
+      }
+
+      currentSelectedFlistFile = file;
+      flistSelectedFileName.innerText = file.name;
+      const sizeKB = (file.size / 1024).toFixed(1);
+      flistSelectedFileSize.innerText = `(${sizeKB} KB)`;
+      flistFileInfoBadge.style.display = 'inline-flex';
+
+      if (!targetFlistNameInput.value.trim()) {
+        targetFlistNameInput.value = file.name;
+      }
+      const dest = targetFlistNameInput.value.trim();
+      log(`📄 Đã chọn tệp FLIST: "${file.name}" (${sizeKB} KB) ➔ Sẽ lưu thành: "${dest}" trên GitHub`, 'info');
+      updateSubmitButtonVisibility();
+    }
+
+    function clearSelectedFlistFile() {
+      currentSelectedFlistFile = null;
+      flistFileInput.value = '';
+      flistFileInfoBadge.style.display = 'none';
+      updateSubmitButtonVisibility();
+      log('🗑️ Đã huỷ chọn tệp FLIST.', 'info');
+    }
+
+    removeFlistBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      clearSelectedFlistFile();
+    });
+
+    flistDropZone.addEventListener('click', () => flistFileInput.click());
+
+    flistFileInput.addEventListener('change', () => {
+      if (flistFileInput.files && flistFileInput.files.length > 0) {
+        handleFlistFileSelected(flistFileInput.files[0]);
+      }
+    });
+
+    // Smart Drag & Drop Handlers for both Drop Zones
+    [pakDropZone, flistDropZone].forEach(zone => {
+      ['dragenter', 'dragover'].forEach(name => {
+        zone.addEventListener(name, (e) => {
+          e.preventDefault();
+          zone.classList.add('dragover');
+        });
+      });
+
+      ['dragleave', 'drop'].forEach(name => {
+        zone.addEventListener(name, (e) => {
+          e.preventDefault();
+          zone.classList.remove('dragover');
+        });
+      });
+    });
+
+    pakDropZone.addEventListener('drop', (e) => {
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        const file = e.dataTransfer.files[0];
+        if (isPakFile(file.name)) {
+          handlePakFileSelected(file);
+        } else if (isFlistFile(file.name)) {
+          log(`💡 Tự động nạp tệp "${file.name}" vào ô Reslist FLIST`, 'info');
+          handleFlistFileSelected(file);
+        } else {
+          log(`❌ TỆP BỊ TỪ CHỐI: "${file.name}" không hợp lệ! Chỉ cho phép tệp .pak hoặc .flist.`, 'err');
+          alert(`❌ LỖI ĐỊNH DẠNG TỆP!\n\nHệ thống chỉ cho phép tải lên tệp .pak hoặc .flist lên GitHub!\nTệp bạn chọn: "${file.name}" không hợp lệ.`);
+        }
+      }
+    });
+
+    flistDropZone.addEventListener('drop', (e) => {
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        const file = e.dataTransfer.files[0];
+        if (isFlistFile(file.name)) {
+          handleFlistFileSelected(file);
+        } else if (isPakFile(file.name)) {
+          log(`💡 Tự động nạp tệp "${file.name}" vào ô Tệp Mod PAK`, 'info');
+          handlePakFileSelected(file);
+        } else {
+          log(`❌ TỆP BỊ TỪ CHỐI: "${file.name}" không hợp lệ! Chỉ cho phép tệp .pak hoặc .flist.`, 'err');
+          alert(`❌ LỖI ĐỊNH DẠNG TỆP!\n\nHệ thống chỉ cho phép tải lên tệp .pak hoặc .flist lên GitHub!\nTệp bạn chọn: "${file.name}" không hợp lệ.`);
+        }
+      }
+    });
+
     // Load Live Version from GitHub
     async function loadVersionInfo() {
       try {
@@ -697,11 +964,15 @@
         
         statVersion.innerText = data.version || 'v3.0.0';
         statPakFile.innerText = data.pak_file || data.fileName || '--';
+        statFlistFile.innerText = data.flist_file || 'apollo_reslist.flist';
         statUpdateDate.innerText = data.update_date || 'Không có';
 
         // Pre-fill fields if empty
         if (!targetPakNameInput.value) {
           targetPakNameInput.value = data.pak_file || data.fileName || 'game_patch_4.6.1.21583.pak';
+        }
+        if (!targetFlistNameInput.value) {
+          targetFlistNameInput.value = data.flist_file || 'apollo_reslist.flist';
         }
         if (!modVersionInput.value && data.version) {
           modVersionInput.value = data.version;
@@ -710,15 +981,16 @@
           updateDateInput.value = getStandardCurrentDate();
         }
 
-        log(`✅ version.json: Phiên bản ${data.version} - Ngày file: ${data.update_date || 'N/A'} - File: ${data.pak_file}`, 'success');
+        log(`✅ version.json: Bản ${data.version} - PAK: ${data.pak_file || 'N/A'} - FLIST: ${data.flist_file || 'apollo_reslist.flist'} - Ngày: ${data.update_date || 'N/A'}`, 'success');
       } catch (err) {
         statVersion.innerText = 'Chưa có file';
         statPakFile.innerText = 'Chưa có file';
+        statFlistFile.innerText = 'Chưa có file';
         log(`⚠️ Chưa đọc được version.json: ${err.message}`, 'warn');
       }
     }
 
-    // Load Repo Files List
+    // Load Repo Files List with Delete Option
     async function loadRepoFiles() {
       const token = githubTokenInput.value.trim();
       if (!token) {
@@ -747,13 +1019,18 @@
             row.className = 'file-item';
             const sizeKB = (f.size / 1024).toFixed(1);
             const sizeStr = f.size > 1048576 ? (f.size / 1048576).toFixed(2) + ' MB' : sizeKB + ' KB';
+            const icon = f.name.endsWith('.pak') ? '📦' : (f.name.endsWith('.flist') ? '📄' : '📁');
+
             row.innerHTML = `
               <div class="file-name">
-                <span>📄</span>
+                <span>${icon}</span>
                 <span>${f.name}</span>
                 <span style="color: #64748b; font-size: 0.72rem;">(${sizeStr})</span>
               </div>
-              <a href="${f.download_url}" target="_blank" class="file-link-btn">Tải về</a>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <a href="${f.download_url}" target="_blank" class="file-link-btn">Tải về</a>
+                <button type="button" class="file-delete-btn" onclick="deleteFileFromRepo('${f.name}', '${f.sha}')">Xoá</button>
+              </div>
             `;
             repoFilesList.appendChild(row);
           }
@@ -766,85 +1043,52 @@
       }
     }
 
+    // Delete File from GitHub API
+    window.deleteFileFromRepo = async function(fileName, fileSha) {
+      const token = githubTokenInput.value.trim();
+      if (!token) {
+        alert('Vui lòng nhập GitHub Personal Access Token ở trên để thực hiện xoá tệp!');
+        githubTokenInput.focus();
+        return;
+      }
+
+      const confirmMsg = `⚠️ BẠN CÓ CHẮC CHẮN MUỐN XOÁ TỆP NÀY TRÊN GITHUB?\n\nTệp: "${fileName}"\n\nLưu ý: Tệp sẽ bị xoá vĩnh viễn khỏi kho lưu trữ GitHub!`;
+      if (!confirm(confirmMsg)) return;
+
+      log(`🗑️ Đang gửi yêu cầu xoá tệp "${fileName}" trên GitHub...`, 'warn');
+
+      try {
+        const res = await fetch(`${API_BASE}/contents/${encodeURIComponent(fileName)}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `token ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            message: `Delete ${fileName} via Lslop Admin Web`,
+            sha: fileSha
+          })
+        });
+
+        if (!res.ok) {
+          const errJson = await res.json();
+          throw new Error(errJson.message || `HTTP ${res.status}`);
+        }
+
+        log(`✅ ĐÃ XOÁ THÀNH CÔNG tệp "${fileName}" khỏi GitHub!`, 'success');
+        alert(`Đã xoá tệp "${fileName}" thành công trên GitHub!`);
+
+        await loadRepoFiles();
+        await loadVersionInfo();
+      } catch (err) {
+        log(`❌ Xoá tệp thất bại: ${err.message}`, 'err');
+        alert(`Lỗi khi xoá tệp: ${err.message}`);
+      }
+    };
+
     refreshRepoBtn.addEventListener('click', () => {
       loadVersionInfo();
       loadRepoFiles();
-    });
-
-    // File Drop Zone
-    dropZone.addEventListener('click', () => pakFileInput.click());
-
-    ['dragenter', 'dragover'].forEach(name => {
-      dropZone.addEventListener(name, (e) => {
-        e.preventDefault();
-        dropZone.classList.add('dragover');
-      });
-    });
-
-    ['dragleave', 'drop'].forEach(name => {
-      dropZone.addEventListener(name, (e) => {
-        e.preventDefault();
-        dropZone.classList.remove('dragover');
-      });
-    });
-
-    dropZone.addEventListener('drop', (e) => {
-      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-        handleFileSelected(e.dataTransfer.files[0]);
-      }
-    });
-
-    pakFileInput.addEventListener('change', () => {
-      if (pakFileInput.files && pakFileInput.files.length > 0) {
-        handleFileSelected(pakFileInput.files[0]);
-      }
-    });
-
-    function clearSelectedFile() {
-      currentSelectedFile = null;
-      pakFileInput.value = '';
-      fileInfoBadge.style.display = 'none';
-      submitBtn.style.display = 'none';
-      if (noFileNotice) noFileNotice.style.display = 'block';
-      log('🗑️ Đã huỷ chọn tệp.', 'info');
-    }
-
-    if (removeSelectedFileBtn) {
-      removeSelectedFileBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        clearSelectedFile();
-      });
-    }
-
-    function handleFileSelected(file) {
-      if (!file) {
-        clearSelectedFile();
-        return;
-      }
-      currentSelectedFile = file;
-      selectedFileName.innerText = file.name;
-      const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-      selectedFileSize.innerText = `(${sizeMB} MB)`;
-      fileInfoBadge.style.display = 'inline-flex';
-
-      // Hiện nút Cập nhật lên GitHub và ẩn thông báo
-      submitBtn.style.display = 'flex';
-      if (noFileNotice) noFileNotice.style.display = 'none';
-
-      // Giữ nguyên tên đích nếu người dùng hoặc version.json đã có tên
-      if (!targetPakNameInput.value.trim()) {
-        targetPakNameInput.value = file.name;
-      }
-
-      const dest = targetPakNameInput.value.trim();
-      log(`📁 Đã chọn file nguồn: "${file.name}" (${sizeMB} MB) ➔ Sẽ tự động đổi tên thành: "${dest}" khi tải lên GitHub`, 'info');
-    }
-
-    targetPakNameInput.addEventListener('input', () => {
-      if (currentSelectedFile) {
-        const dest = targetPakNameInput.value.trim();
-        log(`✏️ Tên tệp lưu trên GitHub sẽ là: "${dest}" (File gốc: "${currentSelectedFile.name}")`, 'info');
-      }
     });
 
     // Convert file to Base64
@@ -898,8 +1142,8 @@
 
     // Main Submit Action
     submitBtn.addEventListener('click', async () => {
-      if (!currentSelectedFile) {
-        alert('Vui lòng chọn tệp mod .pak trước khi cập nhật lên GitHub!');
+      if (!currentSelectedPakFile && !currentSelectedFlistFile) {
+        alert('Vui lòng chọn hoặc kéo thả ít nhất 1 tệp mod (.pak hoặc .flist) trước khi cập nhật lên GitHub!');
         return;
       }
 
@@ -912,15 +1156,32 @@
 
       const version = modVersionInput.value.trim();
       if (!version) {
-        alert('Vui lòng nhập phiên bản Mod (ví dụ: v3.1.0)!');
+        alert('Vui lòng nhập phiên bản Mod (ví dụ: v3.0.0)!');
         modVersionInput.focus();
         return;
       }
 
       const targetPakName = targetPakNameInput.value.trim();
       if (!targetPakName) {
-        alert('Vui lòng nhập tên file PAK mục tiêu!');
+        alert('Vui lòng nhập tên tệp PAK mục tiêu!');
         targetPakNameInput.focus();
+        return;
+      }
+      if (!isPakFile(targetPakName)) {
+        alert('❌ Tên tệp PAK trên GitHub bắt buộc phải có đuôi .pak (Ví dụ: game_patch_4.6.1.21583.pak)!');
+        targetPakNameInput.focus();
+        return;
+      }
+
+      const targetFlistName = targetFlistNameInput.value.trim();
+      if (!targetFlistName) {
+        alert('Vui lòng nhập tên tệp FLIST mục tiêu!');
+        targetFlistNameInput.focus();
+        return;
+      }
+      if (!isFlistFile(targetFlistName)) {
+        alert('❌ Tên tệp FLIST trên GitHub bắt buộc phải có đuôi .flist (Ví dụ: apollo_reslist.flist)!');
+        targetFlistNameInput.focus();
         return;
       }
 
@@ -931,11 +1192,14 @@
       submitBtn.innerHTML = `<span>⏳ Đang tải lên GitHub...</span>`;
 
       try {
-        // STEP 1: Upload PAK file if a new file is chosen
-        if (currentSelectedFile) {
-          log(`🚀 Bắt đầu đọc file ${currentSelectedFile.name} vào bộ nhớ...`, 'info');
-          const base64Pak = await fileToBase64(currentSelectedFile);
-          log(`⬆️ Đang đẩy file ${targetPakName} lên GitHub qua API...`, 'info');
+        // STEP 1: Upload PAK file if selected
+        if (currentSelectedPakFile) {
+          if (!isPakFile(currentSelectedPakFile.name)) {
+            throw new Error(`Tệp "${currentSelectedPakFile.name}" không hợp lệ! Chỉ cho phép tệp có đuôi .pak.`);
+          }
+          log(`🚀 Bắt đầu đọc tệp PAK ${currentSelectedPakFile.name} vào bộ nhớ...`, 'info');
+          const base64Pak = await fileToBase64(currentSelectedPakFile);
+          log(`⬆️ Đang tải tệp ${targetPakName} lên GitHub qua API...`, 'info');
 
           await uploadGitHubFile(
             targetPakName,
@@ -944,13 +1208,30 @@
             token
           );
           log(`🎉 ĐÃ TẢI LÊN THÀNH CÔNG: ${targetPakName}`, 'success');
-        } else {
-          log(`ℹ️ Không có file .pak mới được chọn, tiến hành cập nhật version.json...`, 'info');
         }
 
-        // STEP 2: Generate and Upload version.json
+        // STEP 2: Upload FLIST file if selected
+        if (currentSelectedFlistFile) {
+          if (!isFlistFile(currentSelectedFlistFile.name)) {
+            throw new Error(`Tệp "${currentSelectedFlistFile.name}" không hợp lệ! Chỉ cho phép tệp có đuôi .flist.`);
+          }
+          log(`🚀 Bắt đầu đọc tệp FLIST ${currentSelectedFlistFile.name} vào bộ nhớ...`, 'info');
+          const base64Flist = await fileToBase64(currentSelectedFlistFile);
+          log(`⬆️ Đang tải tệp ${targetFlistName} lên GitHub qua API...`, 'info');
+
+          await uploadGitHubFile(
+            targetFlistName,
+            base64Flist,
+            `Update FLIST file: ${targetFlistName} (${version})`,
+            token
+          );
+          log(`🎉 ĐÃ TẢI LÊN THÀNH CÔNG: ${targetFlistName}`, 'success');
+        }
+
+        // STEP 3: Generate and Upload version.json (chỉ lưu các tệp .pak và .flist)
         const newVersionJson = {
           "pak_file": targetPakName,
+          "flist_file": targetFlistName,
           "version": version,
           "update_date": updateDate
         };
@@ -958,20 +1239,21 @@
         // UTF-8 base64 encoding
         const base64VersionJson = btoa(unescape(encodeURIComponent(versionJsonStr)));
 
-        log(`📝 Đang cập nhật version.json (Bản: ${version}, Ngày: ${updateDate}, Tệp: ${targetPakName})...`, 'info');
+        log(`📝 Đang cập nhật version.json (Bản: ${version}, PAK: ${targetPakName}, FLIST: ${targetFlistName}, Ngày: ${updateDate})...`, 'info');
         await uploadGitHubFile(
           'version.json',
           base64VersionJson,
-          `Update version.json to ${version} (${targetPakName})`,
+          `Update version.json: ${version} (${targetPakName}, ${targetFlistName})`,
           token
         );
         log(`🎉 ĐÃ CẬP NHẬT THÀNH CÔNG version.json!`, 'success');
 
         log(`✨ TẤT CẢ HOÀN TẤT! Người dùng Lslop mở app sẽ nhận ngay bản mod này.`, 'success');
-        alert(`Chúc mừng! Đã cập nhật thành công bản ${version} (${updateDate}) lên GitHub!`);
+        alert(`Chúc mừng! Đã cập nhật thành công lên GitHub:\n- Bản: ${version}\n- Ngày: ${updateDate}\n- PAK: ${targetPakName}\n- FLIST: ${targetFlistName}`);
 
-        // Dọn dẹp tệp đã tải và ẩn nút cập nhật lại
-        clearSelectedFile();
+        // Dọn dẹp tệp đã chọn và ẩn nút submit
+        clearSelectedPakFile();
+        clearSelectedFlistFile();
 
         // Refresh live stats
         await loadVersionInfo();
@@ -982,7 +1264,7 @@
         alert(`Lỗi: ${err.message}`);
       } finally {
         submitBtn.disabled = false;
-        submitBtn.innerHTML = `<span>🚀 CẬP NHẬT LÊN GITHUB</span>`;
+        updateSubmitButtonVisibility();
       }
     });
 
