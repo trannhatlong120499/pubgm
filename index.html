@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lslop Admin - Quản Lý Bản Mod PUBG Mobile</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #06080e;
+      --card-bg: rgba(15, 23, 42, 0.75);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-border-glow: rgba(0, 210, 255, 0.25);
+      --accent-cyan: #00d2ff;
+      --accent-blue: #007aff;
+      --accent-purple: #7928ca;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(0, 210, 255, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(121, 40, 202, 0.08) 0%, transparent 40%),
+        linear-gradient(to bottom, #06080e, #0a0e17);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      line-height: 1.5;
+      padding-bottom: 60px;
+    }
+
+    /* Glass Effect */
+    .glass-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .glass-card:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Container */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
+
+    /* Header Nav */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      margin-bottom: 24px;
+      border-radius: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #00d2ff, #007aff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 4px 16px rgba(0, 210, 255, 0.35);
+    }
+
+    .brand-text h1 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(to right, #ffffff, #a5f3fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-text p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .repo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 6px 14px;
+      border-radius: 100px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #38bdf8;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .repo-badge:hover {
+      background: rgba(56, 189, 248, 0.1);
+      border-color: rgba(56, 189, 248, 0.3);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-emerald);
+      box-shadow: 0 0 8px var(--accent-emerald);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.15); }
+    }
+
+    /* Grid Layout */
+    .grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 860px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Cards */
+    .card-header {
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-header h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-body {
+      padding: 24px;
+    }
+
+    /* Status Banner */
+    .version-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 600px) {
+      .version-summary {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .stat-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 14px;
+      border-radius: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+
+    .stat-val {
+      font-size: 1.05rem;
+      font-weight: 800;
+      margin-top: 4px;
+      color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .stat-val.highlight {
+      color: #38bdf8;
+    }
+
+    /* Form Styles */
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #cbd5e1;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: #fff;
+      font-size: 0.9rem;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    input:focus {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 0 3px rgba(0, 210, 255, 0.2);
+    }
+
+    .toggle-token-btn {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+
+    /* File Drop Zone */
+    .file-dropzone {
+      border: 2px dashed rgba(255, 255, 255, 0.15);
+      border-radius: 16px;
+      padding: 28px 20px;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      position: relative;
+    }
+
+    .file-dropzone:hover, .file-dropzone.dragover {
+      border-color: var(--accent-cyan);
+      background: rgba(0, 210, 255, 0.05);
+    }
+
+    .dropzone-icon {
+      font-size: 38px;
+      margin-bottom: 8px;
+      display: inline-block;
+    }
+
+    .dropzone-text {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #e2e8f0;
+    }
+
+    .dropzone-hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .file-info-badge {
+      display: none;
+      margin-top: 14px;
+      padding: 10px 14px;
+      background: rgba(0, 210, 255, 0.1);
+      border: 1px solid rgba(0, 210, 255, 0.3);
+      border-radius: 10px;
+      font-size: 0.85rem;
+      color: #a5f3fc;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      word-break: break-all;
+    }
+
+    /* Action Button */
+    .btn-submit {
+      width: 100%;
+      background: linear-gradient(135deg, #00d2ff 0%, #007aff 100%);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      padding: 14px 20px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(0, 122, 255, 0.4);
+      transition: all 0.25s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 210, 255, 0.5);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Console Card */
+    .console-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .console-box {
+      background: #04060a;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      padding: 16px;
+      font-family: 'JetBrains Mono', Courier, monospace;
+      font-size: 0.75rem;
+      height: 310px;
+      overflow-y: auto;
+      color: #38bdf8;
+      line-height: 1.6;
+    }
+
+    .console-box::-webkit-scrollbar {
+      width: 6px;
+    }
+    .console-box::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+    }
+
+    .log-line {
+      margin-bottom: 4px;
+      word-break: break-word;
+    }
+    .log-success { color: #4ade80; }
+    .log-warn { color: #facc15; }
+    .log-err { color: #f87171; }
+    .log-info { color: #38bdf8; }
+
+    /* File List Card */
+    .file-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      margin-bottom: 8px;
+      font-size: 0.85rem;
+    }
+
+    .file-item .file-name {
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .file-link-btn {
+      color: #38bdf8;
+      text-decoration: none;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(56, 189, 248, 0.1);
+      transition: all 0.2s;
+    }
+
+    .file-link-btn:hover {
+      background: rgba(56, 189, 248, 0.2);
+    }
+
+    /* Modal / Tooltip */
+    .token-guide-toggle {
+      font-size: 0.75rem;
+      color: #38bdf8;
+      text-decoration: underline;
+      cursor: pointer;
+      margin-top: 4px;
+      display: inline-block;
+    }
+
+    .token-guide {
+      display: none;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 12px;
+      margin-top: 10px;
+      font-size: 0.78rem;
+      color: #94a3b8;
+    }
+
+    .token-guide a {
+      color: #38bdf8;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Header -->
+    <header class="glass-card">
+      <div class="brand">
+        <div class="brand-icon">⚡</div>
+        <div class="brand-text">
+          <h1>LSLOP MOD MANAGER</h1>
+          <p>Hệ Thống Phân Phối Bản Vá PUBG Mobile</p>
+        </div>
+      </div>
+      <div>
+        <a href="https://github.com/trannhatlong120499/pubgm" target="_blank" class="repo-badge">
+          <span class="status-dot"></span>
+          <span>trannhatlong120499/pubgm</span>
+        </a>
+      </div>
+    </header>
+
+    <!-- Top Status Cards -->
+    <div class="version-summary">
+      <div class="stat-box glass-card">
+        <div class="stat-label">Phiên Bản Hiện Tại</div>
+        <div class="stat-val highlight" id="statVersion">Đang tải...</div>
+      </div>
+      <div class="stat-box glass-card">
+        <div class="stat-label">File PAK Mục Tiêu</div>
+        <div class="stat-val" id="statPakFile">Đang tải...</div>
+      </div>
+      <div class="stat-box glass-card">
+        <div class="stat-label">Ngày Cập Nhật</div>
+        <div class="stat-val" id="statUpdateDate">--</div>
+      </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid">
+      <!-- Left Column: Upload & Form -->
+      <div class="glass-card">
+        <div class="card-header">
+          <h2>🚀 Cập Nhật Gói Mod Lên GitHub</h2>
+          <span style="font-size: 0.75rem; color: #94a3b8;">Direct API</span>
+        </div>
+        <div class="card-body">
+          <!-- Token Section -->
+          <div class="form-group">
+            <label for="githubToken">GitHub Personal Access Token (PAT):</label>
+            <div class="input-wrapper">
+              <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
+              <button type="button" class="toggle-token-btn" id="toggleTokenBtn">Hiện</button>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
+              <span class="token-guide-toggle" id="toggleGuideBtn">Cách lấy token trong 30 giây?</span>
+              <span id="tokenStatusText" style="font-size: 0.75rem; color: #10b981; display: none;">✅ Đã lưu token</span>
+            </div>
+            <div class="token-guide" id="tokenGuide">
+              Vào <a href="https://github.com/settings/tokens/new" target="_blank">github.com/settings/tokens/new</a>, tick chọn quyền <b>repo</b> (hoặc <b>contents:write</b>), kéo xuống bấm <b>Generate token</b> và dán vào ô trên. Token chỉ lưu an toàn trên trình duyệt của riêng bạn.
+            </div>
+          </div>
+
+          <!-- File Upload Zone -->
+          <div class="form-group">
+            <label>Chọn Tệp Mod PAK Mới (*.pak):</label>
+            <div class="file-dropzone" id="dropZone">
+              <input type="file" id="pakFileInput" accept=".pak" style="display: none;">
+              <div class="dropzone-icon">📦</div>
+              <div class="dropzone-text">Kéo thả tệp .pak vào đây hoặc bấm để chọn</div>
+              <div class="dropzone-hint">Hỗ trợ tải lên trực tiếp tới 100 MB</div>
+              <div class="file-info-badge" id="fileInfoBadge">
+                <span>📁</span>
+                <b id="selectedFileName">filename.pak</b>
+                <span id="selectedFileSize">(0 MB)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Version Info Input -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+            <div class="form-group">
+              <label for="modVersionInput">Phiên Bản Mod:</label>
+              <input type="text" id="modVersionInput" placeholder="Ví dụ: v3.1.0">
+            </div>
+            <div class="form-group">
+              <label for="updateDateInput">Ngày Cập Nhật (Tuỳ chọn):</label>
+              <input type="text" id="updateDateInput" placeholder="Ví dụ: 25/10/2026">
+            </div>
+          </div>
+
+          <!-- Target PAK filename -->
+          <div class="form-group">
+            <label for="targetPakNameInput">Tên Tệp PAK Trên GitHub:</label>
+            <input type="text" id="targetPakNameInput" placeholder="game_patch_4.6.1.21583.pak">
+            <small style="color: var(--text-muted); font-size: 0.72rem; display: block; margin-top: 4px;">
+              Tên file này sẽ được lưu vào version.json để App Lslop tự động tải về đúng tên.
+            </small>
+          </div>
+
+          <!-- Submit Button -->
+          <button class="btn-submit" id="submitBtn">
+            <span>🚀 CẬP NHẬT LÊN GITHUB</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Right Column: Live Console & Repository Status -->
+      <div style="display: flex; flex-direction: column; gap: 20px;">
+        <!-- Live Console -->
+        <div class="glass-card" style="flex: 1;">
+          <div class="card-header console-header">
+            <h2>💻 Nhật Ký Hoạt Động (Live Log)</h2>
+            <button id="clearLogBtn" style="background: none; border: none; color: #94a3b8; font-size: 0.75rem; cursor: pointer;">Xoá log</button>
+          </div>
+          <div class="card-body" style="padding: 16px;">
+            <div class="console-box" id="consoleBox">
+              <div class="log-line log-info">[Hệ Thống] Sẵn sàng kết nối repository...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Files on Repo -->
+        <div class="glass-card">
+          <div class="card-header">
+            <h2>📂 Tệp Mod Trên GitHub</h2>
+            <button id="refreshRepoBtn" style="background: none; border: none; color: #38bdf8; font-size: 0.78rem; cursor: pointer;">Làm mới</button>
+          </div>
+          <div class="card-body" style="padding: 16px;">
+            <div id="repoFilesList">
+              <div style="color: var(--text-muted); font-size: 0.8rem; text-align: center; padding: 10px;">Đang tải danh sách...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const REPO_OWNER = 'trannhatlong120499';
+    const REPO_NAME = 'pubgm';
+    const RAW_BASE = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main`;
+    const API_BASE = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}`;
+
+    // DOM Elements
+    const statVersion = document.getElementById('statVersion');
+    const statPakFile = document.getElementById('statPakFile');
+    const statUpdateDate = document.getElementById('statUpdateDate');
+    const githubTokenInput = document.getElementById('githubToken');
+    const toggleTokenBtn = document.getElementById('toggleTokenBtn');
+    const tokenStatusText = document.getElementById('tokenStatusText');
+    const toggleGuideBtn = document.getElementById('toggleGuideBtn');
+    const tokenGuide = document.getElementById('tokenGuide');
+    const dropZone = document.getElementById('dropZone');
+    const pakFileInput = document.getElementById('pakFileInput');
+    const fileInfoBadge = document.getElementById('fileInfoBadge');
+    const selectedFileName = document.getElementById('selectedFileName');
+    const selectedFileSize = document.getElementById('selectedFileSize');
+    const modVersionInput = document.getElementById('modVersionInput');
+    const updateDateInput = document.getElementById('updateDateInput');
+    const targetPakNameInput = document.getElementById('targetPakNameInput');
+    const submitBtn = document.getElementById('submitBtn');
+    const consoleBox = document.getElementById('consoleBox');
+    const clearLogBtn = document.getElementById('clearLogBtn');
+    const refreshRepoBtn = document.getElementById('refreshRepoBtn');
+    const repoFilesList = document.getElementById('repoFilesList');
+
+    let currentSelectedFile = null;
+
+    // Logger
+    function log(msg, type = 'info') {
+      const line = document.createElement('div');
+      line.className = `log-line log-${type}`;
+      const time = new Date().toLocaleTimeString();
+      line.innerText = `[${time}] ${msg}`;
+      consoleBox.appendChild(line);
+      consoleBox.scrollTop = consoleBox.scrollHeight;
+    }
+
+    clearLogBtn.addEventListener('click', () => {
+      consoleBox.innerHTML = '';
+      log('Đã làm sạch nhật ký.', 'info');
+    });
+
+    // Token Management
+    const savedToken = localStorage.getItem('lslop_gh_token') || '';
+    if (savedToken) {
+      githubTokenInput.value = savedToken;
+      tokenStatusText.style.display = 'inline';
+    }
+
+    githubTokenInput.addEventListener('input', () => {
+      const val = githubTokenInput.value.trim();
+      if (val) {
+        localStorage.setItem('lslop_gh_token', val);
+        tokenStatusText.style.display = 'inline';
+      } else {
+        localStorage.removeItem('lslop_gh_token');
+        tokenStatusText.style.display = 'none';
+      }
+    });
+
+    toggleTokenBtn.addEventListener('click', () => {
+      if (githubTokenInput.type === 'password') {
+        githubTokenInput.type = 'text';
+        toggleTokenBtn.innerText = 'Ẩn';
+      } else {
+        githubTokenInput.type = 'password';
+        toggleTokenBtn.innerText = 'Hiện';
+      }
+    });
+
+    toggleGuideBtn.addEventListener('click', () => {
+      tokenGuide.style.display = tokenGuide.style.display === 'block' ? 'none' : 'block';
+    });
+
+    // Load Live Version from GitHub
+    async function loadVersionInfo() {
+      try {
+        log('Đang đọc version.json từ GitHub...', 'info');
+        const res = await fetch(`${RAW_BASE}/version.json?t=${Date.now()}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        
+        statVersion.innerText = data.version || 'v1.0.0';
+        statPakFile.innerText = data.pak_file || data.fileName || '--';
+        statUpdateDate.innerText = data.update_date || 'Không có';
+
+        // Pre-fill fields if empty
+        if (!targetPakNameInput.value) {
+          targetPakNameInput.value = data.pak_file || data.fileName || 'game_patch_4.6.1.21583.pak';
+        }
+        if (!modVersionInput.value && data.version) {
+          modVersionInput.value = data.version;
+        }
+
+        log(`✅ version.json: Phiên bản ${data.version} - File: ${data.pak_file}`, 'success');
+      } catch (err) {
+        statVersion.innerText = 'Chưa có file';
+        statPakFile.innerText = 'Chưa có file';
+        log(`⚠️ Chưa đọc được version.json: ${err.message}`, 'warn');
+      }
+    }
+
+    // Load Repo Files List
+    async function loadRepoFiles() {
+      try {
+        const token = githubTokenInput.value.trim();
+        const headers = token ? { 'Authorization': `token ${token}` } : {};
+        const res = await fetch(`${API_BASE}/contents`, { headers });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const files = await res.json();
+
+        repoFilesList.innerHTML = '';
+        files.forEach(f => {
+          if (f.type === 'file') {
+            const row = document.createElement('div');
+            row.className = 'file-item';
+            const sizeKB = (f.size / 1024).toFixed(1);
+            const sizeStr = f.size > 1048576 ? (f.size / 1048576).toFixed(2) + ' MB' : sizeKB + ' KB';
+            row.innerHTML = `
+              <div class="file-name">
+                <span>📄</span>
+                <span>${f.name}</span>
+                <span style="color: #64748b; font-size: 0.72rem;">(${sizeStr})</span>
+              </div>
+              <a href="${f.download_url}" target="_blank" class="file-link-btn">Tải về</a>
+            `;
+            repoFilesList.appendChild(row);
+          }
+        });
+      } catch (err) {
+        repoFilesList.innerHTML = `<div style="color: #f87171; font-size: 0.8rem; text-align: center;">Không tải được danh sách tệp: ${err.message}</div>`;
+      }
+    }
+
+    refreshRepoBtn.addEventListener('click', () => {
+      loadVersionInfo();
+      loadRepoFiles();
+    });
+
+    // File Drop Zone
+    dropZone.addEventListener('click', () => pakFileInput.click());
+
+    ['dragenter', 'dragover'].forEach(name => {
+      dropZone.addEventListener(name, (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+      });
+    });
+
+    ['dragleave', 'drop'].forEach(name => {
+      dropZone.addEventListener(name, (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+      });
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        handleFileSelected(e.dataTransfer.files[0]);
+      }
+    });
+
+    pakFileInput.addEventListener('change', () => {
+      if (pakFileInput.files && pakFileInput.files.length > 0) {
+        handleFileSelected(pakFileInput.files[0]);
+      }
+    });
+
+    function handleFileSelected(file) {
+      currentSelectedFile = file;
+      selectedFileName.innerText = file.name;
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      selectedFileSize.innerText = `(${sizeMB} MB)`;
+      fileInfoBadge.style.display = 'inline-flex';
+
+      // Auto update targetPakName input
+      targetPakNameInput.value = file.name;
+
+      log(`📁 Đã chọn file: ${file.name} (${sizeMB} MB)`, 'info');
+    }
+
+    // Convert file to Base64
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = err => reject(err);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // Get SHA of existing file
+    async function getFileSha(path, token) {
+      try {
+        const res = await fetch(`${API_BASE}/contents/${encodeURIComponent(path)}`, {
+          headers: { 'Authorization': `token ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          return data.sha;
+        }
+      } catch (e) {}
+      return null;
+    }
+
+    // Upload or Update file on GitHub via API
+    async function uploadGitHubFile(path, contentBase64, commitMessage, token) {
+      const sha = await getFileSha(path, token);
+      const payload = {
+        message: commitMessage,
+        content: contentBase64
+      };
+      if (sha) payload.sha = sha;
+
+      const res = await fetch(`${API_BASE}/contents/${encodeURIComponent(path)}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `token ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        const errJson = await res.json();
+        throw new Error(errJson.message || `HTTP ${res.status}`);
+      }
+      return await res.json();
+    }
+
+    // Main Submit Action
+    submitBtn.addEventListener('click', async () => {
+      const token = githubTokenInput.value.trim();
+      if (!token) {
+        alert('Vui lòng nhập GitHub Personal Access Token trước khi cập nhật!');
+        githubTokenInput.focus();
+        return;
+      }
+
+      const version = modVersionInput.value.trim();
+      if (!version) {
+        alert('Vui lòng nhập phiên bản Mod (ví dụ: v3.1.0)!');
+        modVersionInput.focus();
+        return;
+      }
+
+      const targetPakName = targetPakNameInput.value.trim();
+      if (!targetPakName) {
+        alert('Vui lòng nhập tên file PAK mục tiêu!');
+        targetPakNameInput.focus();
+        return;
+      }
+
+      const updateDate = updateDateInput.value.trim();
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<span>⏳ Đang tải lên GitHub...</span>`;
+
+      try {
+        // STEP 1: Upload PAK file if a new file is chosen
+        if (currentSelectedFile) {
+          log(`🚀 Bắt đầu đọc file ${currentSelectedFile.name} vào bộ nhớ...`, 'info');
+          const base64Pak = await fileToBase64(currentSelectedFile);
+          log(`⬆️ Đang đẩy file ${targetPakName} lên GitHub qua API...`, 'info');
+
+          await uploadGitHubFile(
+            targetPakName,
+            base64Pak,
+            `Update PAK mod file: ${targetPakName} (${version})`,
+            token
+          );
+          log(`🎉 ĐÃ TẢI LÊN THÀNH CÔNG: ${targetPakName}`, 'success');
+        } else {
+          log(`ℹ️ Không có file .pak mới được chọn, tiến hành cập nhật version.json...`, 'info');
+        }
+
+        // STEP 2: Generate and Upload version.json
+        const newVersionJson = {
+          "pak_file": targetPakName,
+          "version": version,
+          "update_date": updateDate
+        };
+        const versionJsonStr = JSON.stringify(newVersionJson, null, 2);
+        // UTF-8 base64 encoding
+        const base64VersionJson = btoa(unescape(encodeURIComponent(versionJsonStr)));
+
+        log(`📝 Đang cập nhật version.json (Bản: ${version}, Tệp: ${targetPakName})...`, 'info');
+        await uploadGitHubFile(
+          'version.json',
+          base64VersionJson,
+          `Update version.json to ${version} (${targetPakName})`,
+          token
+        );
+        log(`🎉 ĐÃ CẬP NHẬT THÀNH CÔNG version.json!`, 'success');
+
+        log(`✨ TẤT CẢ HOÀN TẤT! Người dùng Lslop mở app sẽ nhận ngay bản mod này.`, 'success');
+        alert(`Chúc mừng! Đã cập nhật thành công bản ${version} lên GitHub!`);
+
+        // Refresh live stats
+        await loadVersionInfo();
+        await loadRepoFiles();
+
+      } catch (err) {
+        log(`❌ LỖI KHI CẬP NHẬT: ${err.message}`, 'err');
+        alert(`Lỗi: ${err.message}`);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<span>🚀 CẬP NHẬT LÊN GITHUB</span>`;
+      }
+    });
+
+    // Auto-init on page load
+    loadVersionInfo();
+    loadRepoFiles();
+  </script>
+</body>
+</html>
