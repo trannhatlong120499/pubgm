@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>auth</key>
+	<string>1,2,3,4,5,7,10,14,19,32,36</string>
+	<key>serial</key>
+	<string>ff3c01047559f067b53b5270a07011e2</string>
+	<key>productiondate</key>
+	<string>8/31/2022</string>
+	<key>region</key>
+	<string>CH/A</string>
+	<key>modelnumber</key>
+	<string>NQ893</string>
+	<key>udid</key>
+	<string>00008120-000A18560C3B401E</string>
+	<key>cid</key>
+	<string>200200</string>
+	<key>adate</key>
+	<string>2026-10-24T10:16:30</string>
+	<key>pcguid</key>
+	<string>{4974DB3C-9A1E-46CA-A442-90B1AF508E1B}</string>
+</dict>
+</plist>
