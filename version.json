@@ -1,5 +1,7 @@
 {
   "pak_file": "game_patch_4.6.1.21583.pak",
+  "flist_file": "apollo_reslist.flist",
   "version": "v3.0.0",
-  "update_date": "25/10/2026"
+  "update_date": "25/10/2026",
+  "detail": "Bản mod tối ưu hoá hiệu năng, mở khoá FPS và chống rung"
 }
