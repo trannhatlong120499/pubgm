@@ -524,6 +524,10 @@
         <div class="stat-label">Ngày Cập Nhật</div>
         <div class="stat-val" id="statUpdateDate">--</div>
       </div>
+      <div class="stat-box glass-card" style="grid-column: 1 / -1;">
+        <div class="stat-label">Mô Tả Bản Mod Hiện Tại (Detail)</div>
+        <div class="stat-val" id="statDetail" style="font-size: 0.92rem; font-weight: normal; color: #cbd5e1; white-space: normal; line-height: 1.4;">Đang tải...</div>
+      </div>
     </div>
 
     <!-- Main Content Grid -->
@@ -621,6 +625,15 @@
             </div>
           </div>
 
+          <!-- Mod Detail Input (Mô tả chi tiết bản mod) -->
+          <div class="form-group" style="margin-top: 14px; margin-bottom: 0;">
+            <label for="modDetailInput">Mô Tả Bản Mod (Detail - Hiện Trong App Lslop):</label>
+            <textarea id="modDetailInput" rows="2" placeholder="Ví dụ: Bản mod tối ưu hoá hiệu năng, mở khoá FPS và chống rung" style="width: 100%; background: #0b1120; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 12px; padding: 10px 14px; color: #fff; font-family: inherit; font-size: 0.88rem; resize: vertical; outline: none;"></textarea>
+            <small style="color: #38bdf8; font-size: 0.72rem; display: block; margin-top: 4px;">
+              💡 Phần chữ này sẽ được lưu vào thẻ <b>detail</b> của version.json và hiển thị ngay dưới phiên bản &amp; ngày cập nhật trong app Lslop!
+            </small>
+          </div>
+
           <!-- Submit Button (Chỉ hiển thị khi đã chọn tệp hợp lệ) -->
           <button class="btn-submit" id="submitBtn" style="display: none;">
             <span>🚀 CẬP NHẬT LÊN GITHUB</span>
@@ -705,6 +718,8 @@
     // DOM Elements - Meta Inputs & Action
     const modVersionInput = document.getElementById('modVersionInput');
     const updateDateInput = document.getElementById('updateDateInput');
+    const modDetailInput = document.getElementById('modDetailInput');
+    const statDetail = document.getElementById('statDetail');
     const submitBtn = document.getElementById('submitBtn');
     const noFileNotice = document.getElementById('noFileNotice');
 
@@ -966,6 +981,9 @@
         statPakFile.innerText = data.pak_file || data.fileName || '--';
         statFlistFile.innerText = data.flist_file || 'apollo_reslist.flist';
         statUpdateDate.innerText = data.update_date || 'Không có';
+        if (statDetail) {
+          statDetail.innerText = data.detail || data.description || 'Chưa có mô tả';
+        }
 
         // Pre-fill fields if empty
         if (!targetPakNameInput.value) {
@@ -980,12 +998,16 @@
         if (!updateDateInput.value) {
           updateDateInput.value = getStandardCurrentDate();
         }
+        if (!modDetailInput.value && (data.detail || data.description)) {
+          modDetailInput.value = data.detail || data.description;
+        }
 
-        log(`✅ version.json: Bản ${data.version} - PAK: ${data.pak_file || 'N/A'} - FLIST: ${data.flist_file || 'apollo_reslist.flist'} - Ngày: ${data.update_date || 'N/A'}`, 'success');
+        log(`✅ version.json: Bản ${data.version} - PAK: ${data.pak_file || 'N/A'} - FLIST: ${data.flist_file || 'apollo_reslist.flist'} - Ngày: ${data.update_date || 'N/A'} - Detail: ${data.detail || 'N/A'}`, 'success');
       } catch (err) {
         statVersion.innerText = 'Chưa có file';
         statPakFile.innerText = 'Chưa có file';
         statFlistFile.innerText = 'Chưa có file';
+        if (statDetail) statDetail.innerText = 'Chưa có file';
         log(`⚠️ Chưa đọc được version.json: ${err.message}`, 'warn');
       }
     }
@@ -1228,18 +1250,21 @@
           log(`🎉 ĐÃ TẢI LÊN THÀNH CÔNG: ${targetFlistName}`, 'success');
         }
 
+        const detailText = modDetailInput.value.trim() || 'Bản mod tối ưu hoá hiệu năng, mở khoá FPS và chống rung';
+
         // STEP 3: Generate and Upload version.json (chỉ lưu các tệp .pak và .flist)
         const newVersionJson = {
           "pak_file": targetPakName,
           "flist_file": targetFlistName,
           "version": version,
-          "update_date": updateDate
+          "update_date": updateDate,
+          "detail": detailText
         };
         const versionJsonStr = JSON.stringify(newVersionJson, null, 2);
         // UTF-8 base64 encoding
         const base64VersionJson = btoa(unescape(encodeURIComponent(versionJsonStr)));
 
-        log(`📝 Đang cập nhật version.json (Bản: ${version}, PAK: ${targetPakName}, FLIST: ${targetFlistName}, Ngày: ${updateDate})...`, 'info');
+        log(`📝 Đang cập nhật version.json (Bản: ${version}, PAK: ${targetPakName}, FLIST: ${targetFlistName}, Ngày: ${updateDate}, Detail: ${detailText})...`, 'info');
         await uploadGitHubFile(
           'version.json',
           base64VersionJson,
