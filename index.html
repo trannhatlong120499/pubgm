@@ -528,6 +528,10 @@
         <div class="stat-label">Mô Tả Bản Mod Hiện Tại (Detail)</div>
         <div class="stat-val" id="statDetail" style="font-size: 0.92rem; font-weight: normal; color: #cbd5e1; white-space: normal; line-height: 1.4;">Đang tải...</div>
       </div>
+      <div class="stat-box glass-card" style="grid-column: 1 / -1; border-color: rgba(245, 158, 11, 0.35); background: rgba(245, 158, 11, 0.04);">
+        <div class="stat-label" style="color: #fbbf24;">⚠️ Dòng Lưu Ý Hiện Tại Trong App Lslop (waring.json)</div>
+        <div class="stat-val" id="statWarning" style="font-size: 0.92rem; font-weight: normal; color: #fde68a; white-space: normal; line-height: 1.4;">Đang tải...</div>
+      </div>
     </div>
 
     <!-- Main Content Grid -->
@@ -634,6 +638,23 @@
             </small>
           </div>
 
+          <!-- Warning Notice Input (Lưu ý hiển thị trong app Lslop - waring.json) -->
+          <div class="form-group" style="margin-top: 14px; margin-bottom: 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <label for="warningNoticeInput" style="margin-bottom: 0; color: #fbbf24;">⚠️ Dòng Lưu Ý Trong App Lslop (waring.json):</label>
+              <button type="button" id="updateWarningOnlyBtn" style="background: rgba(245, 158, 11, 0.18); border: 1px solid rgba(245, 158, 11, 0.45); color: #fbbf24; font-size: 0.75rem; font-weight: 600; padding: 5px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                ⚡ Cập Nhật waring.json Lên GitHub
+              </button>
+            </div>
+            <textarea id="warningNoticeInput" rows="2" placeholder="Ví dụ: ⚠️ Lưu ý: Trước đây đã cài mod PAK bằng cách khác vui lòng chọn xoá all game_patch, res_pufferpatch" style="width: 100%; background: #0b1120; border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; padding: 10px 14px; color: #fde68a; font-family: inherit; font-size: 0.88rem; resize: vertical; outline: none;"></textarea>
+            <div style="margin-top: 6px;">
+              <input type="text" id="warningNoticeEnInput" placeholder="Bản dịch Tiếng Anh (Notice EN - tuỳ chọn): ⚠️ Notice: If you previously installed..." style="width: 100%; background: #0b1120; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 8px 12px; color: #94a3b8; font-size: 0.82rem; outline: none;">
+            </div>
+            <small style="color: #fbbf24; font-size: 0.72rem; display: block; margin-top: 4px;">
+              💡 Phần chữ này sẽ được lưu vào tệp <b>waring.json</b> trên GitHub. App Lslop mỗi lần khởi động sẽ đọc trực tiếp từ GitHub để hiển thị lên dòng Lưu Ý!
+            </small>
+          </div>
+
           <!-- Submit Button (Chỉ hiển thị khi đã chọn tệp hợp lệ) -->
           <button class="btn-submit" id="submitBtn" style="display: none;">
             <span>🚀 CẬP NHẬT LÊN GITHUB</span>
@@ -720,6 +741,10 @@
     const updateDateInput = document.getElementById('updateDateInput');
     const modDetailInput = document.getElementById('modDetailInput');
     const statDetail = document.getElementById('statDetail');
+    const warningNoticeInput = document.getElementById('warningNoticeInput');
+    const warningNoticeEnInput = document.getElementById('warningNoticeEnInput');
+    const updateWarningOnlyBtn = document.getElementById('updateWarningOnlyBtn');
+    const statWarning = document.getElementById('statWarning');
     const submitBtn = document.getElementById('submitBtn');
     const noFileNotice = document.getElementById('noFileNotice');
 
@@ -1010,6 +1035,30 @@
         if (statDetail) statDetail.innerText = 'Chưa có file';
         log(`⚠️ Chưa đọc được version.json: ${err.message}`, 'warn');
       }
+
+      // Load waring.json from GitHub
+      try {
+        log('Đang đọc waring.json từ GitHub...', 'info');
+        const warnRes = await fetch(`${RAW_BASE}/waring.json?t=${Date.now()}`);
+        if (warnRes.ok) {
+          const warnData = await warnRes.json();
+          const warnText = warnData.notice_vi || warnData.warning_vi || warnData.warning || warnData.notice || '';
+          const warnTextEn = warnData.notice_en || warnData.warning_en || warnData.message_en || '';
+          if (statWarning) statWarning.innerText = warnText || 'Chưa có lưu ý';
+          if (!warningNoticeInput.value && warnText) {
+            warningNoticeInput.value = warnText;
+          }
+          if (!warningNoticeEnInput.value && warnTextEn) {
+            warningNoticeEnInput.value = warnTextEn;
+          }
+          log(`✅ waring.json: "${warnText}"`, 'success');
+        } else {
+          if (statWarning) statWarning.innerText = 'Chưa tạo file waring.json';
+        }
+      } catch (wErr) {
+        if (statWarning) statWarning.innerText = 'Chưa tải được';
+        log(`⚠️ Chưa đọc được waring.json: ${wErr.message}`, 'warn');
+      }
     }
 
     // Load Repo Files List with Delete Option
@@ -1162,6 +1211,60 @@
       return await res.json();
     }
 
+    // Update Warning (waring.json) Only
+    if (updateWarningOnlyBtn) {
+      updateWarningOnlyBtn.addEventListener('click', async () => {
+        const token = githubTokenInput.value.trim();
+        if (!token) {
+          log('❌ LỖI: Vui lòng nhập GitHub Token trước khi cập nhật waring.json!', 'err');
+          alert('Vui lòng nhập GitHub Personal Access Token (PAT) ở trên trước!');
+          githubTokenInput.focus();
+          return;
+        }
+
+        const warnVi = warningNoticeInput.value.trim();
+        if (!warnVi) {
+          alert('Vui lòng nhập nội dung lưu ý trước khi cập nhật!');
+          warningNoticeInput.focus();
+          return;
+        }
+        const warnEn = warningNoticeEnInput.value.trim() || warnVi;
+
+        updateWarningOnlyBtn.disabled = true;
+        updateWarningOnlyBtn.innerText = '⏳ Đang lưu...';
+
+        try {
+          log('📝 Đang đẩy waring.json lên GitHub...', 'info');
+          const warnPayload = {
+            "warning": warnVi,
+            "notice_vi": warnVi,
+            "notice_en": warnEn,
+            "update_date": getStandardCurrentDate()
+          };
+          const warnJsonStr = JSON.stringify(warnPayload, null, 2);
+          const base64Warn = btoa(unescape(encodeURIComponent(warnJsonStr)));
+
+          await uploadGitHubFile(
+            'waring.json',
+            base64Warn,
+            `Update waring.json: ${warnVi.substring(0, 30)}...`,
+            token
+          );
+
+          log('🎉 ĐÃ CẬP NHẬT THÀNH CÔNG waring.json LÊN GITHUB!', 'success');
+          if (statWarning) statWarning.innerText = warnVi;
+          alert('🎉 Cập nhật waring.json lên GitHub thành công!\nApp Lslop khi mở sẽ hiển thị lưu ý này.');
+          await loadRepoFiles();
+        } catch (err) {
+          log(`❌ LỖI CẬP NHẬT waring.json: ${err.message}`, 'err');
+          alert(`Lỗi khi cập nhật waring.json: ${err.message}`);
+        } finally {
+          updateWarningOnlyBtn.disabled = false;
+          updateWarningOnlyBtn.innerText = '⚡ Cập Nhật waring.json Lên GitHub';
+        }
+      });
+    }
+
     // Main Submit Action
     submitBtn.addEventListener('click', async () => {
       if (!currentSelectedPakFile && !currentSelectedFlistFile) {
@@ -1272,6 +1375,22 @@
           token
         );
         log(`🎉 ĐÃ CẬP NHẬT THÀNH CÔNG version.json!`, 'success');
+
+        // STEP 4: Đồng bộ waring.json lên GitHub nếu có nhập lưu ý
+        const warnVi = warningNoticeInput.value.trim();
+        if (warnVi) {
+          const warnEn = warningNoticeEnInput.value.trim() || warnVi;
+          const warnPayload = {
+            "warning": warnVi,
+            "notice_vi": warnVi,
+            "notice_en": warnEn,
+            "update_date": updateDate
+          };
+          const base64Warn = btoa(unescape(encodeURIComponent(JSON.stringify(warnPayload, null, 2))));
+          log('📝 Đang đồng bộ waring.json lên GitHub...', 'info');
+          await uploadGitHubFile('waring.json', base64Warn, `Sync waring.json (${version})`, token);
+          log('🎉 ĐÃ ĐỒNG BỘ waring.json!', 'success');
+        }
 
         log(`✨ TẤT CẢ HOÀN TẤT! Người dùng Lslop mở app sẽ nhận ngay bản mod này.`, 'success');
         alert(`Chúc mừng! Đã cập nhật thành công lên GitHub:\n- Bản: ${version}\n- Ngày: ${updateDate}\n- PAK: ${targetPakName}\n- FLIST: ${targetFlistName}`);
